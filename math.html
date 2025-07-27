@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quiz Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .timer {
+            font-size: 20px;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .question-box {
+            background: #667eea;
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .expression {
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .feedback {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            color: #22c55e;
+        }
+
+        .feedback.wrong {
+            color: #ef4444;
+        }
+
+        .penalty-animation {
+            color: #ef4444;
+            font-weight: bold;
+            animation: fadeUp 1s ease-out;
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .correct-btn {
+            background: #4ade80;
+            color: white;
+        }
+
+        .correct-btn:hover {
+            background: #22c55e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 222, 128, 0.4);
+        }
+
+        .wrong-btn {
+            background: #f87171;
+            color: white;
+        }
+
+        .wrong-btn:hover {
+            background: #ef4444;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(248, 113, 113, 0.4);
+        }
+
+        .results-screen, .leaderboard-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .final-time {
+            font-size: 48px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .save-btn {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .leaderboard {
+            margin-top: 30px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .leaderboard-entry:nth-child(1) {
+            background: #ffd700;
+            font-weight: bold;
+        }
+
+        .leaderboard-entry:nth-child(2) {
+            background: #c0c0c0;
+            font-weight: bold;
+        }
+
+        .leaderboard-entry:nth-child(3) {
+            background: #cd7f32;
+            font-weight: bold;
+        }
+
+        .rank {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .expression {
+                font-size: 28px;
+            }
+
+            button {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+
+            .final-time {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-screen">
+            <div class="header">
+                <h1>Math Quiz</h1>
+                <div class="timer">Time: <span id="timer">0.0</span>s</div>
+            </div>
+            
+            <div class="question-box">
+                <div class="expression" id="currentExpression"></div>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="buttons">
+                <button class="correct-btn" onclick="checkAnswer(true)">Correct (1)</button>
+                <button class="wrong-btn" onclick="checkAnswer(false)">Wrong (0)</button>
+            </div>
+        </div>
+
+        <div class="results-screen">
+            <h1>Game Complete!</h1>
+            <div class="final-time" id="finalTime"></div>
+            <p>Enter your name:</p>
+            <input type="text" id="playerName" placeholder="Your name" maxlength="20">
+            <button class="save-btn" onclick="saveScore()">Save & Play Again</button>
+        </div>
+
+        <div class="leaderboard-screen">
+            <div class="leaderboard">
+                <h2>Top 10 Leaderboard</h2>
+                <div id="leaderboardList"></div>
+            </div>
+            <button class="save-btn" onclick="startNewGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let startTime = 0;
+        let timerInterval = null;
+        let penaltyTime = 0;
+
+        function generateQuestion() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            const isAddition = Math.random() < 0.5;
+            
+            let correctAnswer;
+            let expression;
+            
+            if (isAddition) {
+                correctAnswer = num1 + num2;
+                expression = `${num1} + ${num2}`;
+            } else {
+                // Ensure no negative results
+                const larger = Math.max(num1, num2);
+                const smaller = Math.min(num1, num2);
+                correctAnswer = larger - smaller;
+                expression = `${larger} - ${smaller}`;
+            }
+            
+            const isCorrect = Math.random() < 0.5;
+            let displayedAnswer = correctAnswer;
+            
+            if (!isCorrect) {
+                // Generate a wrong answer that's different from the correct one
+                do {
+                    displayedAnswer = correctAnswer + Math.floor(Math.random() * 5) - 2;
+                } while (displayedAnswer === correctAnswer || displayedAnswer < 0);
+            }
+            
+            return {
+                expression: expression,
+                displayedAnswer: displayedAnswer,
+                isCorrect: isCorrect
+            };
+        }
+
+        function initGame() {
+            questions = [];
+            for (let i = 0; i < 10; i++) {
+                questions.push(generateQuestion());
+            }
+            
+            currentQuestionIndex = 0;
+            penaltyTime = 0;
+            startTime = Date.now();
+            
+            updateQuestionDisplay();
+            startTimer();
+        }
+
+        function updateQuestionDisplay() {
+            const currentExpression = document.getElementById('currentExpression');
+            
+            if (currentQuestionIndex < 10) {
+                currentExpression.textContent = 
+                    `${questions[currentQuestionIndex].expression} = ${questions[currentQuestionIndex].displayedAnswer}`;
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000 + penaltyTime;
+                document.getElementById('timer').textContent = elapsed.toFixed(1);
+            }, 100);
+        }
+
+        function checkAnswer(userSaysCorrect) {
+            const question = questions[currentQuestionIndex];
+            const isAnswerRight = (userSaysCorrect === question.isCorrect);
+            const feedback = document.getElementById('feedback');
+            
+            if (isAnswerRight) {
+                feedback.textContent = '✓ Correct!';
+                feedback.className = 'feedback correct';
+            } else {
+                feedback.innerHTML = '✗ Wrong! <span class="penalty-animation">+2s</span>';
+                feedback.className = 'feedback wrong';
+                penaltyTime += 2;
+                
+                // Update timer immediately to show penalty
+                const elapsed = (Date.now() - startTime) / 1000 + penaltyTime;
+                document.getElementById('timer').textContent = elapsed.toFixed(1);
+            }
+            
+            currentQuestionIndex++;
+            
+            setTimeout(() => {
+                if (currentQuestionIndex >= 10) {
+                    endGame();
+                } else {
+                    feedback.textContent = '';
+                    updateQuestionDisplay();
+                }
+            }, 500);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            const totalTime = ((Date.now() - startTime) / 1000 + penaltyTime).toFixed(1);
+            
+            document.querySelector('.game-screen').style.display = 'none';
+            document.querySelector('.results-screen').style.display = 'block';
+            document.getElementById('finalTime').textContent = `${totalTime}s`;
+            document.getElementById('playerName').focus();
+        }
+
+        function saveScore() {
+            const name = document.getElementById('playerName').value.trim();
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            const totalTime = parseFloat(document.getElementById('finalTime').textContent);
+            
+            // Get existing leaderboard
+            let leaderboard = JSON.parse(localStorage.getItem('mathQuizLeaderboard') || '[]');
+            
+            // Add new score
+            leaderboard.push({
+                name: name,
+                time: totalTime,
+                date: new Date().toISOString()
+            });
+            
+            // Sort by time (fastest first) and keep only top 10
+            leaderboard.sort((a, b) => a.time - b.time);
+            leaderboard = leaderboard.slice(0, 10);
+            
+            // Save to localStorage
+            localStorage.setItem('mathQuizLeaderboard', JSON.stringify(leaderboard));
+            
+            // Show leaderboard
+            showLeaderboard();
+        }
+
+        function showLeaderboard() {
+            document.querySelector('.results-screen').style.display = 'none';
+            document.querySelector('.leaderboard-screen').style.display = 'block';
+            
+            const leaderboard = JSON.parse(localStorage.getItem('mathQuizLeaderboard') || '[]');
+            const listElement = document.getElementById('leaderboardList');
+            
+            listElement.innerHTML = '';
+            
+            leaderboard.forEach((entry, index) => {
+                const div = document.createElement('div');
+                div.className = 'leaderboard-entry';
+                div.innerHTML = `
+                    <span><span class="rank">#${index + 1}</span> ${entry.name}</span>
+                    <span>${entry.time}s</span>
+                `;
+                listElement.appendChild(div);
+            });
+            
+            if (leaderboard.length === 0) {
+                listElement.innerHTML = '<p style="text-align: center; color: #666;">No scores yet!</p>';
+            }
+        }
+
+        function startNewGame() {
+            // Reset UI
+            document.querySelector('.game-screen').style.display = 'block';
+            document.querySelector('.results-screen').style.display = 'none';
+            document.querySelector('.leaderboard-screen').style.display = 'none';
+            document.getElementById('playerName').value = '';
+            
+            // Start new game
+            initGame();
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function(event) {
+            // Only work during game screen
+            if (document.querySelector('.game-screen').style.display === 'none') return;
+            
+            if (event.key === '1') {
+                checkAnswer(true);
+            } else if (event.key === '0') {
+                checkAnswer(false);
+            }
+        });
+
+        // Start the game when page loads
+        window.onload = initGame;
+    </script>
+</body>
+</html>
